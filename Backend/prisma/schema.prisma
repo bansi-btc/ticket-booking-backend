@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  number String @unique
+  name String
+  verified Boolean @default(false)
+  booking Booking[]
+  payments Payment[]
+}
+
+model Admin{
+  id String @id @default(uuid())
+  number String @unique
+  name String
+  verified Boolean @default(false)
+  events Event[]
+}
+
+model Event{
+  id String @id @default(uuid())
+  name String 
+  description String
+  banner String
+  adminId String 
+  admin Admin @relation(fields: [adminId], references: [id])
+  bookings Booking[]
+  payments Payment[]
+}
+
+model Booking{
+  id String @id @default(uuid())
+  eventId String
+  userId String
+  event Event @relation(fields: [eventId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  seats Seat[]
+}
+
+model Seat{
+  id String @id @default(uuid())
+  SeatTypeId String
+  bookingId String
+  qr String
+  seatType SeatType @relation(fields: [SeatTypeId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model SeatType{
+  id String @id @default(uuid())
+  name String
+  event String
+  price Int
+  description String
+  seats Seat[]
+}
+
+model Payment {
+  id String @id @default(uuid())
+  eventId String
+  userId String
+  status PaymentState
+  user User @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+}
+
+enum PaymentState {
+  PENDING
+  PAID
+  FAILED
+}
